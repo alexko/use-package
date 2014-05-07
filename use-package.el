@@ -284,6 +284,13 @@ For full documentation. please see commentary.
           (if (stringp interpreter) (cons interpreter name) interpreter))
          (predicate (use-package-plist-get args :if))
          (pkg-load-path (use-package-plist-get-value args :load-path))
+         (exp-load-path
+          (mapcar
+           (lambda (path) (if (file-name-absolute-p path) path
+             (expand-file-name path user-emacs-directory)))
+           (cond ((stringp pkg-load-path) (list pkg-load-path))
+                 ((functionp pkg-load-path) (funcall pkg-load-path))
+                 (t pkg-load-path))))
          (defines-eval (if (null defines)
                            nil
                          (if (listp defines)
@@ -302,13 +309,7 @@ For full documentation. please see commentary.
     ;; force this immediately -- one off cost
     (unless
         (or (use-package-plist-get args :disabled)
-            (if (locate-library
-                 name-string nil
-                 (mapcar
-                  (lambda (path) (expand-file-name path user-emacs-directory))
-                  (cond ((stringp pkg-load-path) (list pkg-load-path))
-                        ((functionp pkg-load-path) (funcall pkg-load-path))
-                        (t pkg-load-path)))) nil
+            (if (locate-library name-string nil exp-load-path) nil
               (message "Unable to locate %s" name-string)))
 
       (let* ((ensure (use-package-plist-get args :ensure))
@@ -393,16 +394,7 @@ For full documentation. please see commentary.
          ,pre-load-body
          ,@(mapcar
             #'(lambda (path)
-                `(add-to-list 'load-path
-                              ,(if (file-name-absolute-p path)
-                                   path
-                                 (expand-file-name path user-emacs-directory))))
-            (cond ((stringp pkg-load-path)
-                   (list pkg-load-path))
-                  ((functionp pkg-load-path)
-                   (funcall pkg-load-path))
-                  (t
-                   pkg-load-path)))
+                `(add-to-list 'load-path ,path)) exp-load-path)
 
          (eval-when-compile
            (when (bound-and-true-p byte-compile-current-file)
