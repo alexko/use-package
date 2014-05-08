@@ -63,6 +63,11 @@
   :type 'number
   :group 'use-package)
 
+(defcustom use-package-skip-availability-check nil
+  "Skip package availability checks to save startup time."
+  :type 'boolean
+  :group 'use-package)
+
 (defmacro use-package-with-elapsed-timer (text &rest body)
   (declare (indent 1))
   (let ((nowvar (make-symbol "now")))
@@ -314,6 +319,7 @@ For full documentation. please see commentary.
               (when package-name
                 (require 'package)
                 (use-package-ensure-elpa package-name)) nil)
+            use-package-skip-availability-check
             (if (locate-library name-string nil exp-load-path) nil
               (message "Unable to locate %s" name-string)))
 
