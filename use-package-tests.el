@@ -44,6 +44,24 @@
                   '(:foo bar baz bal :blob plap plup :blam))
                  '(:foo :blob :blam))))
 
+
+(ert-deftest use-package-load-path-2 ()
+  (let ((load-path load-path)
+        (pkg-name "xxx"))
+    (dolist (ver '("1.0" "2.0"))
+      (let ((path (format "/tmp/%s-%s/" pkg-name ver)))
+        (unless (file-exists-p path) (make-directory path))
+        (write-region
+         (format "(defvar xxx-version \"%s\")\n(provide 'xxx)" ver)
+                  nil (concat path pkg-name ".el"))))
+    ;; the load path has to have them in the wrong order
+    (dolist (ver '("2.0" "1.0"))
+      (add-to-list
+       'load-path (format "/tmp/%s-%s" pkg-name ver)))
+    (use-package xxx
+      :load-path "/tmp/xxx-2.0")
+    (should (equal xxx-version "2.0"))))
+
 ;; Local Variables:
 ;; indent-tabs-mode: nil
 ;; End:
