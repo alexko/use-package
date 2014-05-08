@@ -392,9 +392,8 @@ For full documentation. please see commentary.
 
       `(progn
          ,pre-load-body
-         ,@(mapcar
-            #'(lambda (path)
-                `(add-to-list 'load-path ,path)) exp-load-path)
+         (setq load-path
+                 (append (quote ,exp-load-path) load-path))
 
          (eval-when-compile
            (when (bound-and-true-p byte-compile-current-file)
