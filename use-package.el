@@ -283,6 +283,7 @@ For full documentation. please see commentary.
          (interpreter-alist
           (if (stringp interpreter) (cons interpreter name) interpreter))
          (predicate (use-package-plist-get args :if))
+         (ensure (use-package-plist-get args :ensure))
          (pkg-load-path (use-package-plist-get-value args :load-path))
          (exp-load-path
           (mapcar
@@ -309,19 +310,12 @@ For full documentation. please see commentary.
     ;; force this immediately -- one off cost
     (unless
         (or (use-package-plist-get args :disabled)
+            (let* ((package-name (or (and (eq ensure t) name) ensure)))
+              (when package-name
+                (require 'package)
+                (use-package-ensure-elpa package-name)) nil)
             (if (locate-library name-string nil exp-load-path) nil
               (message "Unable to locate %s" name-string)))
-
-      (let* ((ensure (use-package-plist-get args :ensure))
-             (package-name
-              (or (and (eq ensure t)
-                       name)
-                  ensure)))
-
-        (when package-name
-          (require 'package)
-          (use-package-ensure-elpa package-name)))
-
 
       (if diminish-var
           (setq config-body
