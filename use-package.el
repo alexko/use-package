@@ -297,6 +297,7 @@ For full documentation. please see commentary.
            (cond ((stringp pkg-load-path) (list pkg-load-path))
                  ((functionp pkg-load-path) (funcall pkg-load-path))
                  (t pkg-load-path))))
+         (found-path nil)
          (defines-eval (if (null defines)
                            nil
                          (if (listp defines)
@@ -320,7 +321,8 @@ For full documentation. please see commentary.
                 (require 'package)
                 (use-package-ensure-elpa package-name)) nil)
             use-package-skip-availability-check
-            (if (locate-library name-string nil exp-load-path) nil
+            (if (setq found-path
+                      (locate-library name-string nil exp-load-path)) nil
               (message "Unable to locate %s" name-string)))
 
       (if diminish-var
@@ -399,8 +401,8 @@ For full documentation. please see commentary.
            (when (bound-and-true-p byte-compile-current-file)
              ,@defines-eval
              ,(if (stringp name)
-                  `(load ,name t)
-                `(require ',name nil t))))
+                  `(load (or ,found-path ,name) t)
+                `(require ',name ,found-path t))))
 
          ,(if (and (or commands (use-package-plist-get args :defer))
                    (not (use-package-plist-get args :demand)))
