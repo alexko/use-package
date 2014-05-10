@@ -429,8 +429,8 @@ For full documentation. please see commentary.
                  (use-package-with-elapsed-timer
                      ,(format "Loading package %s" name-string)
                    (if (not ,(if (stringp name)
-                                 `(load ,name t)
-                               `(require ',name nil t)))
+                                 `(load (or ',found-path ',name) t)
+                               `(require ',name ',found-path t)))
                        (message "Could not load package %s" ,name-string)
                      ,pre-init-body
                      ,init-body
