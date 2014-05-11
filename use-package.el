@@ -321,8 +321,10 @@ For full documentation. please see commentary.
                 (require 'package)
                 (use-package-ensure-elpa package-name)) nil)
             use-package-skip-availability-check
-            (if (setq found-path
-                      (locate-library name-string nil exp-load-path)) nil
+            (if (setq
+                 found-path
+                 (locate-file name-string exp-load-path (get-load-suffixes)))
+                 nil
               (message "Unable to locate %s" name-string)))
 
       (if diminish-var
