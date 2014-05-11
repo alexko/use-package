@@ -323,7 +323,9 @@ For full documentation. please see commentary.
             use-package-skip-availability-check
             (if (setq
                  found-path
-                 (locate-file name-string exp-load-path (get-load-suffixes)))
+                 (locate-file name-string
+                              (or exp-load-path load-path)
+                              (get-load-suffixes)))
                  nil
               (message "Unable to locate %s" name-string)))
 
